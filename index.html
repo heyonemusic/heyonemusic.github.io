@@ -1,176 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Slap Clicker</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Telegram Mini Apps Vanilla JS Sample App</title>
     <style>
         body {
-            font-family: Ubuntu, sans-serif;
-            display: flex;
-            font-weight: 900;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            color: #fff;
-            margin: 0;
-            background-color: #fff;
+            --bg-color: var(--tg-theme-bg-color);
+            font: 12px/18px "Lucida Grande", "Lucida Sans Unicode", Arial, Helvetica, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--tg-theme-text-color);
+            margin: 48px 24px;
+            padding: 0;
+            color-scheme: var(--tg-color-scheme);
         }
-        .game-container {
-            text-align: center;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0), #333);
-            padding: 20px 20px 120px 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+
+        a {
+            color: var(--tg-theme-link-color);
         }
-        .score {
-            display: flex;
-            align-items: center;
-            font-size: 41px;
+        #viewport {
+            position: fixed;
+            left: 0;
+            right: 0;
+            top: 0;
+            height: var(--tg-viewport-stable-height, 100vh);
+            pointer-events: none;
+            transition: all .2s ease;
         }
-        .score img {
+        #viewport:after {
+            content: '';
             display: block;
-            margin-right: 15px;
-            vertical-align: middle;
-            border-radius: 50px;
-            box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
-        }
-        .click-image {
-            width: 400px;
-            height: 400px;
-            cursor: pointer;
-        }
-        .click-image:disabled {
-            cursor: not-allowed;
-        }
-        .progress-bar-container {
-            margin-top: 20px;
-            width: 100%;
-            background-color: #000;
-            border-radius: 10px;
-            overflow: hidden;
-            position: relative;
-        }
-        .progress-bar {
-            height: 20px;
-            padding: 7px;
-            background: linear-gradient(to right, #76c7c0, #9b59b6);
-            width: 100%;
-            transition: width 1s linear;
-        }
-        .energy-icon {
             position: absolute;
-            color: #fff100;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 22px;
-            transition: left 1s linear;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            border-width: 4px;
+            border-style: solid;
+            border-image: linear-gradient(45deg, rgba(64, 224, 208, .5), rgba(173, 255, 47, .5)) 1;
+        }
+
+        #viewport-params-size,
+        #viewport-params-expand {
+            content: attr(text);
+            position: absolute;
+            display: inline-block;
+            background: var(--tg-theme-link-color, rgb(64, 224, 208));
+            right: 4px;
+            left: auto;
+            font-size: 8px;
+            padding: 4px;
+            vertical-align: top;
+        }
+        #viewport-params-size {
+            top: 4px;
+        }
+        #viewport-params-expand {
+            top: 30px;
         }
     </style>
 </head>
+
 <body>
-    <div class="game-container">
-        <div style="padding-bottom:120px;display:flex;justify-content:space-between;align-items:center;">
-            <div class="score"><img width="81" height="81" src="slap.png"> <span style="font-size:41px;" id="score">0</span></div>
-            <span style="font-size:41px;" id="time">⌚</span>    
+    <main>
+        <div align="center">
+            <a href="https://ton.org/"><img width="48" src="./assets/tapps.png" alt="logo of telegram web apps"></a>
         </div>
-        <img src="1.png" alt="Boss" class="click-image" id="clickImage" onmousedown="handleMouseDown()" ontouchstart="handleTouchStart()" onmouseup="handleMouseUp()" ontouchend="handleTouchEnd()">
-        <div class="progress-bar-container">
-            <div class="progress-bar" id="progressBar"></div>
-            <i class="fas fa-bolt energy-icon" id="energyIcon"></i>
-        </div>
-    </div>
+        <h1>Modals</h1>
+        <button onclick="Telegram.WebApp.showAlert('Hello World!');">Launch Alert</button>
+        <button onclick="showPopup();">Launch Popup</button>
 
+        <h1>Links</h1>
+        <ul>
+            <li>
+                <a href="javascript:Telegram.WebApp.openTelegramLink('https://t.me/trendingapps');">Open link within Telegram</a>
+            </li>
+            <li>
+                <a href="javascript:Telegram.WebApp.openLink('https://ton.org/');">Open link in external browser</a>
+            </li>
+            <li>
+                <a href="javascript:Telegram.WebApp.openLink('https://telegra.ph/api',{try_instant_view:true});">Open link inside Telegram webview</a>
+            </li>
+        </ul>
+
+        <h1>Buttons</h1>
+        <button onclick="Telegram.WebApp.expand();">Expand Webview</button>
+        <button onclick="toggleMainButton();">Toggle Main Button</button>
+    </main>
+    <div id="viewport"></div>
+    <div id="viewport-params-size"></div>
+    <div id="viewport-params-expand"></div>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
-        // Инициализация переменных
-        let score = 0;
-        const clickLimit = 100;
-        let clicks = 0;
-        let timeLeft = 0;
-        const limitTime = 20; // 5 секунд
-        const progressBar = document.getElementById('progressBar');
-        const clickImage = document.getElementById('clickImage');
-        const energyIcon = document.getElementById('energyIcon');
-        const timeElement = document.getElementById('time');
+        // Init TWA
+        Telegram.WebApp.ready();
 
-        // Список изображений
-        const images = [
-            "1.png",
-            "2.png"
-        ];
+        // Event occurs whenever theme settings are changed in the user's Telegram app (including switching to night mode).
+        Telegram.WebApp.onEvent('themeChanged', function() {
+            document.documentElement.className = Telegram.WebApp.colorScheme;
+        });
 
-        // Обновление счетчика очков
-        function incrementScore() {
-            if (clicks < clickLimit) {
-                score++;
-                clicks++;
-                document.getElementById('score').innerText = score;
-                updateProgressBar();
-                if (clicks === clickLimit) {
-                    startCooldown();
+        // Show main button
+        Telegram.WebApp.MainButton.setParams({
+            text: 'Main Button'
+        });
+        Telegram.WebApp.MainButton.onClick(function () {
+            Telegram.WebApp.showAlert('Main Button was clicked')
+        });	
+        Telegram.WebApp.MainButton.show();
+
+        // Function to call showPopup API
+        function showPopup() {
+            Telegram.WebApp.showPopup({
+                title: 'Title',
+                message: 'Some message',
+                buttons: [
+                    {id: 'link', type: 'default', text: 'Open ton.org'},
+                    {type: 'cancel'},
+                ]
+            }, function(btn) {
+                if (btn === 'link') {
+                    Telegram.WebApp.openLink('https://ton.org/');
                 }
+            });
+        };
+
+        // Function to toggle main TWA button
+        function toggleMainButton() {
+            if (Telegram.WebApp.MainButton.isVisible) {
+                Telegram.WebApp.MainButton.hide();
+            } else {
+                Telegram.WebApp.MainButton.show();
             }
+        };
+
+        function setViewportData() {
+            var sizeEl = document.getElementById('viewport-params-size');
+            sizeEl.innerText = 'width: ' + window.innerWidth + ' x ' + 
+                'height: ' + Telegram.WebApp.viewportStableHeight;
+
+            var expandEl = document.querySelector('#viewport-params-expand');
+            expandEl.innerText = 'Is Expanded: ' + (Telegram.WebApp.isExpanded ? 'true' : 'false');
         }
 
-        // Обработка события нажатия мыши
-        function handleMouseDown() {
-            if (clicks < clickLimit) {
-                clickImage.src = images[1];
-                incrementScore();
-            }
-        }
+        Telegram.WebApp.setHeaderColor('secondary_bg_color');
 
-        // Обработка события touchstart для мобильных устройств
-        function handleTouchStart() {
-            if (clicks < clickLimit) {
-                clickImage.src = images[1];
-                incrementScore();
-            }
-        }
+        setViewportData();
+        Telegram.WebApp.onEvent('viewportChanged', setViewportData);
 
-        // Обработка события отпускания мыши
-        function handleMouseUp() {
-            clickImage.src = images[0];
-        }
+        Telegram.WebApp.onEvent('themeChanged', function() {
+            document.body.setAttribute('style', '--bg-color:' + Telegram.WebApp.backgroundColor);
+        });
 
-        // Обработка события touchend для мобильных устройств
-        function handleTouchEnd() {
-            clickImage.src = images[0];
-        }
-
-        // Запуск таймера ожидания
-        function startCooldown() {
-            clickImage.style.pointerEvents = 'none'; // Блокируем изображение для кликов
-            timeLeft = limitTime;
-            const interval = setInterval(() => {
-                timeLeft--;
-                const percentage = ((limitTime - timeLeft) / limitTime) * 100;
-                progressBar.style.width = percentage + '%';
-                timeElement.textContent = `⌚ ${timeLeft}s`;
-
-                if (timeLeft <= 0) {
-                    clearInterval(interval);
-                    resetClicks();
-                }
-            }, 1000);
-        }
-
-        // Обновление шкалы времени ожидания
-        function updateProgressBar() {
-            const percentage = ((clickLimit - clicks) / clickLimit) * 100;
-            progressBar.style.width = percentage + '%';
-        }
-
-        // Сброс кликов
-        function resetClicks() {
-            clicks = 0;
-            progressBar.style.width = '100%';
-            clickImage.style.pointerEvents = 'auto'; // Разблокируем изображение для кликов
-            clickImage.src = images[0]; // Возвращаем начальное изображение
-            timeElement.textContent = `⌚`;
-        }
     </script>
+
+    <!-- Eruda is console for mobile browsers -->
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
 </body>
 </html>
