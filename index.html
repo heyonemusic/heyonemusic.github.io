@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slap Clicker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: Ubuntu, sans-serif;
+            display: flex;
+            font-weight: 900;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #fff;
+            margin: 0;
+            background-color: #fff;
+        }
+        .game-container {
+            text-align: center;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0), #333);
+            padding: 20px 20px 100px 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .score {
+            display: flex;
+            align-items: center;
+            font-size: 41px;
+        }
+        .score img {
+            display: block;
+            margin-right: 15px;
+            vertical-align: middle;
+            border-radius: 50px;
+            box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+        }
+        .click-image {
+            width: 400px;
+            height: 400px;
+            cursor: pointer;
+        }
+        .click-image:disabled {
+            cursor: not-allowed;
+        }
+        .progress-bar-container {
+            margin-top: 20px;
+            width: 100%;
+            background-color: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        .progress-bar {
+            height: 20px;
+            padding: 7px;
+            background: linear-gradient(to right, #76c7c0, #9b59b6);
+            width: 100%;
+            transition: width 1s linear;
+        }
+        .energy-icon {
+            position: absolute;
+            color: #fff100;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 22px;
+            transition: left 1s linear;
+        }
+        .image-selector {
+            margin-top: 20px;
+            font-size: 20px;
+            color: #fff;
+        }
+        .styled-select {
+            appearance: none;
+            background-color: #76c7c0;
+            border: none;
+            padding: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #fff;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        .styled-select option {
+            background-color: #333;
+            color: #fff;
+        }
+                /* Запрещаем выделение текста с помощью CSS */
+                body {
+            -webkit-user-select: none; /* Chrome, Safari, Opera */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* Internet Explorer/Edge */
+            user-select: none;         /* Non-prefixed version, currently supported by most browsers */
+        }
+
+              /* Запрещаем перетаскивание изображений */
+              img {
+            -webkit-user-drag: none; /* Chrome, Safari, Opera */
+            -moz-user-drag: none;    /* Firefox */
+            -ms-user-drag: none;     /* Internet Explorer/Edge */
+            user-drag: none;         /* Non-prefixed version, currently supported by most browsers */
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div style="padding-bottom:100px;display:flex;justify-content:space-between;align-items:center;">
+            <div class="score"><img width="81" height="81" src="slap.png"> <span style="font-size:41px;" id="score">0</span></div>
+            <span style="font-size:41px;" id="time">⌚</span>    
+        </div>
+        <img src="1.png" alt="Boss" class="click-image" id="clickImage" onmousedown="handleMouseDown()" ontouchstart="handleTouchStart()" onmouseup="handleMouseUp()" ontouchend="handleTouchEnd()">
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar"></div>
+            <i class="fas fa-bolt energy-icon" id="energyIcon"></i>
+        </div>
+        <div class="image-selector">
+            <label for="imageSelect" style="color:#000;">Choose method 👉</label>
+            <select id="imageSelect" class="styled-select" onchange="changeClickImage()">
+                <option value="2.png">👊</option>
+                <option value="3.png">🤪</option>
+                <option value="4.png">🤭</option>
+                <!-- Добавьте дополнительные опции для других изображений здесь -->
+            </select>
+        </div>
+    </div>
+
+    <script>
+        // Инициализация переменных
+        let score = 0;
+        const clickLimit = 70;
+        let clicks = 0;
+        let timeLeft = 0;
+        const limitTime = 15; // 20 секунд
+        const progressBar = document.getElementById('progressBar');
+        const clickImage = document.getElementById('clickImage');
+        const energyIcon = document.getElementById('energyIcon');
+        const timeElement = document.getElementById('time');
+        const imageSelect = document.getElementById('imageSelect');
+        let currentClickImage = "2.png";
+
+        // Список изображений
+        const images = [
+            "1.png",
+            "2.png",
+            "3.png",
+            "4.png"
+            // Добавьте дополнительные изображения сюда
+        ];
+
+        // Обновление счетчика очков
+        function incrementScore() {
+            if (clicks < clickLimit) {
+                score++;
+                clicks++;
+                document.getElementById('score').innerText = score;
+                updateProgressBar();
+                if (clicks === clickLimit) {
+                    startCooldown();
+                }
+            }
+        }
+
+        // Обработка события нажатия мыши
+        function handleMouseDown() {
+            if (clicks < clickLimit) {
+                clickImage.src = currentClickImage;
+                incrementScore();
+            }
+        }
+
+        // Обработка события touchstart для мобильных устройств
+        function handleTouchStart() {
+            if (clicks < clickLimit) {
+                clickImage.src = currentClickImage;
+                incrementScore();
+            }
+        }
+
+        // Обработка события отпускания мыши
+        function handleMouseUp() {
+            clickImage.src = images[0];
+        }
+
+        // Обработка события touchend для мобильных устройств
+        function handleTouchEnd() {
+            clickImage.src = images[0];
+        }
+
+        // Запуск таймера ожидания
+        function startCooldown() {
+            clickImage.style.pointerEvents = 'none'; // Блокируем изображение для кликов
+            timeLeft = limitTime;
+            const interval = setInterval(() => {
+                timeLeft--;
+                const percentage = ((limitTime - timeLeft) / limitTime) * 100;
+                progressBar.style.width = percentage + '%';
+                timeElement.textContent = `⌚ ${timeLeft}s`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    resetClicks();
+                }
+            }, 1000);
+        }
+
+        // Обновление шкалы времени ожидания
+        function updateProgressBar() {
+            const percentage = ((clickLimit - clicks) / clickLimit) * 100;
+            progressBar.style.width = percentage + '%';
+        }
+
+        // Сброс кликов
+        function resetClicks() {
+            clicks = 0;
+            progressBar.style.width = '100%';
+            clickImage.style.pointerEvents = 'auto'; // Разблокируем изображение для кликов
+            clickImage.src = images[0]; // Возвращаем начальное изображение
+            timeElement.textContent = `⌚`;
+        }
+
+        // Изменение изображения для клика
+        function changeClickImage() {
+            currentClickImage = imageSelect.value;
+        }
+
+               // Запрещаем копирование текста
+               document.addEventListener('copy', function(e) {
+            e.preventDefault();
+        });
+
+        // Запрещаем выделение текста
+        document.addEventListener('selectstart', function(e) {
+            e.preventDefault();
+        });
+
+                // Запрещаем копирование и скачивание изображений
+                document.addEventListener('contextmenu', function(e) {
+            if (e.target.tagName === 'IMG') {
+                e.preventDefault();
+            }
+        });
+
+        // Запрещаем перетаскивание изображений
+        document.querySelectorAll('img').forEach(img => {
+            img.addEventListener('dragstart', function(e) {
+                e.preventDefault();
+            });
+        });
+    </script>
+</body>
+</html>
